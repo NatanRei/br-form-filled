@@ -1,99 +1,110 @@
-# BR Form Filler — esqueleto de arquitetura
+<div align="center">
 
-MVP funcional pra você começar a codar em cima. Resolve, de propósito, os 3
-bugs que você encontrou testando Fake Filler, Fake Data Easy e o gerador da
-Box4Dev — o resto (cobertura de campos, lista de cidades, UI) é roadmap.
+# 🇧🇷 BR Form Filler
 
-## Estrutura
+**Preenche formulários de teste com um clique — com dados brasileiros que passam validação.**
 
+![Status](https://img.shields.io/badge/status-MVP-yellow)
+![Manifest](https://img.shields.io/badge/manifest-v3-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Local first](https://img.shields.io/badge/dados-100%25%20locais-success)
+
+</div>
+
+---
+
+Se você testa formulário web no Brasil, você conhece o ritual: abrir o
+[4devs.com.br](https://www.4devs.com.br) numa aba, gerar um CPF, copiar,
+colar, voltar, gerar um CEP, copiar, colar, repetir pra cada campo. O **BR
+Form Filler** lê o formulário, descobre o tipo de cada campo sozinho, e
+preenche tudo com um clique — sem trocar de aba.
+
+<!-- TODO: screenshot ou GIF do popup preenchendo um formulário real aqui -->
+
+## Por que mais uma extensão de autofill?
+
+Porque testamos as alternativas que já existem e cada uma quebrou de um
+jeito diferente — e nenhuma delas pensa em dado brasileiro válido por padrão:
+
+| | **BR Form Filler** | Fake Filler | Fake Data Easy | Gerador de Dados Fictícios (Box4Dev) |
+|---|---|---|---|---|
+| Preenche o formulário (não só copia) | ✅ | ✅ | ✅ | ❌ — só gera, não injeta no campo¹ |
+| Funciona em campo controlado (React/Vue) | ✅ | ⚠️ — falhou no nosso teste¹ | ✅ | — |
+| CPF/CNPJ com dígito verificador válido | ✅ | — (sem foco BR) | ✅ | ✅ |
+| CNPJ alfanumérico (formato jul/2026) | ✅ | — | — | — |
+| Select dependente (estado → cidade) sem lixo | ✅ | — | ⚠️ — gerou valor fora das opções¹ | — |
+| Lembra configuração por **formulário**, não por site/URL | ✅ | por perfil de site | por site | — |
+| Permissão de acesso a todos os sites | ❌ — só `activeTab`, sob demanda | ✅ pede sempre | ✅ pede sempre | ✅ pede sempre |
+| Código aberto | ✅ | ❌ | ❌ | ⚠️ parcial |
+
+¹ Resultado de teste manual nosso, em formulários reais — não é avaliação genérica das ferramentas.
+
+## Funcionalidades
+
+- **Detecção automática de tipo de campo** — por `autocomplete`, `name`/`id`,
+  texto do `<label>`, placeholder e até `maxlength` (11 dígitos → CPF, 14 →
+  CNPJ, 8 → CEP). O que não reconhece, vira palavra aleatória — você ajusta
+  no popup antes de preencher.
+- **Dados brasileiros que passam validação** — CPF e CNPJ com dígito
+  verificador calculado de verdade (não é número aleatório com cara de
+  CPF), incluindo suporte ao CNPJ alfanumérico que passa a valer em
+  julho/2026. CEP dentro da faixa real de cada capital.
+- **Funciona em formulário controlado** — preenche via setter nativo do
+  `HTMLInputElement`, então React, Vue e Angular percebem a mudança de
+  verdade (esse é o bug clássico que derruba outras extensões).
+- **Não embaralha select dependente** — em campos tipo estado → cidade,
+  espera a cidade popular e escolhe uma opção que existe de fato, em vez de
+  chutar texto livre num `<select>`.
+- **Lembra a configuração por formulário**, não por site — calcula um
+  fingerprint do conjunto de campos (no espírito do que o LastPass faz com
+  formulário de login), então a mesma página pode ter form de busca, login
+  e cadastro sem misturar configuração.
+- **Permissão mínima de propósito** — usa `activeTab`, só injeta o script
+  quando você clica no ícone. Não tem `host_permissions` pedindo acesso a
+  todos os sites o tempo todo.
+- **100% local** — nenhum dado gerado ou configuração sai do seu navegador.
+  Sem conta, sem servidor, sem telemetria.
+
+## Instalação
+
+Ainda não publicado na Chrome Web Store — por enquanto, modo desenvolvedor:
+
+```bash
+git clone https://github.com/SEU_USUARIO/br-form-filler.git
 ```
-manifest.json       MV3, permissões mínimas (activeTab + scripting + storage)
-content.js          orquestrador: scan, fill, mensagens
-lib/detector.js      heurísticas de tipo de campo
-lib/generators.js    dados BR com dígito verificador válido (CPF/CNPJ/CEP)
-lib/filler.js         injeção segura de valor + guarda de loop + select dependente
-lib/fingerprint.js    "impressão digital" do formulário + persistência local
-popup.html/css/js    UI: lista de campos + override de tipo + botão preencher
-```
 
-## Fluxo, passo a passo
+1. Abra `chrome://extensions`
+2. Ative **Modo do desenvolvedor** (canto superior direito)
+3. Clique **Carregar sem compactação** e selecione a pasta `br-form-filler`
 
-1. Usuário clica no ícone da extensão → `popup.js` roda.
-2. Popup injeta os scripts na aba ativa via `chrome.scripting.executeScript`
-   (não fica um content script residente em toda página — só quando você
-   pede). Os arquivos são carregados em ordem e compartilham o objeto
-   global `window.__BRFF`.
-3. Popup manda `{action: 'scan'}` pro content script.
-4. `detector.scanFields()` varre `input/select/textarea` visíveis e
-   detectáveis, e devolve tipo + label pra cada um.
-5. `fingerprint.computeFormFingerprint()` gera um hash a partir do conjunto
-   estável de campos (tag+type+name/id, na ordem do DOM) — é o "ID do
-   formulário" que você pediu, no espírito do que o LastPass faz.
-6. Se já existe config salva pra esse fingerprint (`chrome.storage.local`),
-   ela sobrescreve os tipos detectados automaticamente.
-7. Popup renderiza a lista com um `<select>` de tipo por campo, pré-marcado.
-8. Usuário ajusta o que estiver errado e clica "Preencher".
-9. Popup manda `{action: 'fill', mapping}` (key → tipo escolhido).
-10. `filler.js` injeta cada valor com o setter nativo do
-    HTMLInputElement/HTMLTextAreaElement (resolve o bug do Fake Filler em
-    inputs controlados por React/Vue), dispara `input`/`change`/`blur` na
-    ordem certa, e dá um respiro entre campos.
-11. Se há um campo "estado" e um "cidade", trata como par dependente:
-    seta o estado, espera (via `MutationObserver`) as `<option>` da cidade
-    popularem, e só então escolhe uma cidade que realmente existe ali.
-12. No fim, salva o mapping (key → tipo) no storage local, indexado pelo
-    fingerprint — próxima vez que abrir esse mesmo formulário, já vem
-    pré-configurado.
+## Como usar
 
-## Por que as decisões que tomei
+1. Abra o formulário que quer testar
+2. Clique no ícone do BR Form Filler
+3. A extensão lista os campos detectados — ajuste o tipo de algum que
+   tenha vindo errado
+4. Clique **Preencher**
 
-- **`activeTab` + injeção sob demanda, não `host_permissions: ["<all_urls>"]`
-  no manifest.** O Fake Filler e o MockFill pedem acesso a todos os sites o
-  tempo todo, o que assusta usuário corporativo e dificulta a aprovação na
-  Chrome Web Store. Só pedir acesso quando o popup abre é mais barato de
-  revisar e mais fácil de confiar — e é um diferencial de marketing real
-  ("não lê nada até você clicar").
-- **Fingerprint por conjunto de campos, não por URL.** Uma URL pode ter
-  form de busca, login e cadastro ao mesmo tempo; o fingerprint resolve
-  isso sem exigir configuração manual por página.
-- **Config local em JSON, não "nuvem" desde já.** Sincronizar automaticamente
-  significaria mandar pra um servidor qual sistema interno você está
-  testando — risco de privacidade real pra quem testa app de empresa com
-  NDA. Dá pra resolver "não reconfigurar de novo" com export/import de JSON
-  (commitável em repo, versionado junto com o form) antes de precisar de
-  backend.
+Na próxima vez que abrir o mesmo formulário, a configuração já vem
+lembrada.
 
-## Limitações conhecidas (roadmap v2)
+## Roadmap
 
-- **Dropdowns customizados** (`react-select`, MUI Autocomplete, Radix) não
-  são `<select>` nativo — não vão funcionar com `fillSelect()` como está.
-  Precisa detectar `role="combobox"` e simular clique + teclado.
-- **Inputs com máscara de lib de terceiro** (ex: `react-input-mask`) podem
-  interceptar `keydown` em vez de só escutar `input`/`change` — é onde o
-  Fake Data Easy provavelmente travou. Se `nativeSetValue` + eventos não
-  bastar num campo específico, o próximo passo é simular tecla a tecla
-  (`KeyboardEvent` por caractere) em vez de setar o valor inteiro de uma vez.
-- **Shadow DOM e iframes** não são varridos por `querySelectorAll` comum —
-  precisa recursão manual em `el.shadowRoot` e re-injeção do script dentro
-  de cada `iframe` (same-origin only; cross-origin é bloqueado pelo browser
-  por design, sem solução).
-- **Lista de cidades é só um subconjunto** de 7 estados — trocar por JSON
-  completo do IBGE quando for além do MVP.
-- **`endereco`, `numero_endereco`, `bairro`, `cartao_credito`** já aparecem
-  como tipos detectáveis e já estão na lista de opções do popup, mas ainda
-  caem no fallback de palavra aleatória — faltam geradores dedicados.
-- Só o **primeiro** par estado/cidade da página recebe o tratamento de
-  select dependente; formulários com endereço de cobrança E entrega (dois
-  pares) preenchem o segundo par sem essa lógica especial.
+- [ ] Dropdowns customizados (`react-select`, MUI Autocomplete)
+- [ ] Inputs com máscara de lib de terceiro (simulação tecla a tecla)
+- [ ] Shadow DOM e iframes same-origin
+- [ ] Lista completa de municípios do IBGE
+- [ ] Geradores dedicados pra endereço, bairro e cartão de crédito de teste
+- [ ] Export/import de configuração em JSON (versionável em repo)
 
-## Como testar
+Detalhes de como cada peça funciona por dentro (e por que tomamos cada
+decisão) estão em [ARCHITECTURE.md](./ARCHITECTURE.md).
 
-1. `chrome://extensions` → ative "Modo do desenvolvedor".
-2. "Carregar sem compactação" → selecione a pasta `br-form-filler`.
-3. Abra um formulário de teste, clique no ícone da extensão.
-4. Ajuste os tipos que vierem errados, clique "Preencher".
+## Contribuindo
 
-Sugestão de próximo passo: testar primeiro nos três formulários que você já
-usou pra avaliar os concorrentes (o React controlado, o com máscara de
-telefone/CPF, e o select de estado/cidade) — são exatamente os casos que
-este esqueleto foi desenhado pra passar.
+Issues e PRs são bem-vindos — principalmente relatos de formulário real que
+quebrou. É basicamente assim que esse projeto nasceu.
+
+## Licença
+
+[MIT](./LICENSE) — use, modifique e distribua livremente.
