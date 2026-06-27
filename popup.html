@@ -7,16 +7,19 @@
 </head>
 <body>
   <header>
-    <h1>BR Form Filler</h1>
-    <button id="rescan" title="Reler o formulário">⟳</button>
+    <div class="brand">
+      <span class="brand-dot" aria-hidden="true"></span>
+      <h1>BR Form Filler</h1>
+    </div>
+    <button id="rescan" class="icon-btn" title="Reler o formulário" aria-label="Reler o formulário">⟳</button>
   </header>
 
-  <p id="status">Lendo formulário…</p>
-  <ul id="fields"></ul>
+  <p id="status" class="status status--loading">Lendo formulário…</p>
+  <ul id="fields" class="fields"></ul>
 
   <footer>
-    <button id="clearConfig" class="secondary">Limpar config. salva</button>
-    <button id="fillBtn" class="primary">Preencher</button>
+    <button id="clearConfig" class="btn btn-ghost">Limpar config.</button>
+    <button id="fillBtn" class="btn btn-primary">Preencher</button>
   </footer>
 
   <script src="popup.js"></script>

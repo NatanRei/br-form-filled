@@ -20,12 +20,23 @@ const TYPE_OPTIONS = [
   ['senha', 'Senha'],
   ['link', 'Link'],
   ['texto_longo', 'Texto longo'],
-  ['select_generico', 'Select genérico'],
+  ['dropdown_generico', 'Dropdown (opção aleatória)'],
   ['palavra_aleatoria', 'Palavra aleatória'],
 ];
 
 let activeTabId = null;
 let currentFields = [];
+
+function setStatus(text, variant) {
+  const status = document.getElementById('status');
+  status.textContent = text;
+  status.className = `status status--${variant}`;
+}
+
+function setFillingState(isFilling) {
+  document.getElementById('fillBtn').disabled = isFilling;
+  document.getElementById('clearConfig').disabled = isFilling;
+}
 
 async function getActiveTab() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -33,8 +44,8 @@ async function getActiveTab() {
 }
 
 async function injectAndScan() {
-  const status = document.getElementById('status');
-  status.textContent = 'Lendo formulário…';
+  setStatus('Lendo formulário…', 'loading');
+  document.getElementById('fields').innerHTML = '';
 
   const tab = await getActiveTab();
   activeTabId = tab.id;
@@ -51,25 +62,45 @@ async function injectAndScan() {
 
 function renderFields(fields) {
   const list = document.getElementById('fields');
-  const status = document.getElementById('status');
   list.innerHTML = '';
 
   if (fields.length === 0) {
-    status.textContent = 'Nenhum campo encontrado nesta página.';
+    setStatus('Nenhum campo encontrado nesta página.', 'empty');
     return;
   }
-  status.textContent = `${fields.length} campo(s) encontrado(s):`;
+
+  const dropdownCount = fields.filter((f) => f.isDropdown).length;
+  const dropdownNote = dropdownCount > 0 ? ` (${dropdownCount} select/dropdown)` : '';
+  setStatus(`${fields.length} campo(s) encontrado(s)${dropdownNote}`, 'loading');
 
   for (const field of fields) {
-    const li = document.createElement('li');
+    const card = document.createElement('li');
+    card.className = 'field-card';
+
+    const top = document.createElement('div');
+    top.className = 'field-top';
 
     const labelSpan = document.createElement('span');
     labelSpan.className = 'field-label';
+    labelSpan.title = field.label;
     labelSpan.textContent = field.label;
+
+    const meta = document.createElement('div');
+    meta.className = 'field-meta';
+
+    if (field.isDropdown) {
+      const badge = document.createElement('span');
+      badge.className = 'badge';
+      badge.textContent = '▾ dropdown';
+      meta.appendChild(badge);
+    }
 
     const keyCode = document.createElement('code');
     keyCode.className = 'field-key';
     keyCode.textContent = field.key;
+    meta.appendChild(keyCode);
+
+    top.append(labelSpan, meta);
 
     const select = document.createElement('select');
     select.dataset.key = field.key;
@@ -81,8 +112,8 @@ function renderFields(fields) {
       select.appendChild(opt);
     }
 
-    li.append(labelSpan, keyCode, select);
-    list.appendChild(li);
+    card.append(top, select);
+    list.appendChild(card);
   }
 }
 
@@ -93,10 +124,17 @@ async function handleFillClick() {
     mapping[s.dataset.key] = s.value;
   });
 
-  const status = document.getElementById('status');
-  status.textContent = 'Preenchendo…';
-  await chrome.tabs.sendMessage(activeTabId, { action: 'fill', mapping });
-  status.textContent = 'Preenchido ✓ (configuração salva pra este formulário)';
+  setFillingState(true);
+  setStatus('Preenchendo…', 'loading');
+  try {
+    await chrome.tabs.sendMessage(activeTabId, { action: 'fill', mapping });
+    setStatus('Preenchido ✓ — configuração salva pra este formulário', 'success');
+  } catch (err) {
+    setStatus('Erro ao preencher: ' + err.message, 'error');
+    console.error(err);
+  } finally {
+    setFillingState(false);
+  }
 }
 
 async function handleClearConfig() {
@@ -109,6 +147,6 @@ document.getElementById('rescan').addEventListener('click', injectAndScan);
 document.getElementById('clearConfig').addEventListener('click', handleClearConfig);
 
 injectAndScan().catch((err) => {
-  document.getElementById('status').textContent = 'Erro ao ler a página: ' + err.message;
+  setStatus('Erro ao ler a página: ' + err.message, 'error');
   console.error(err);
 });

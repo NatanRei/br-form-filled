@@ -71,9 +71,6 @@ popup.html/css/js    UI: lista de campos + override de tipo + botão preencher
 
 ## Limitações conhecidas (roadmap v2)
 
-- **Dropdowns customizados** (`react-select`, MUI Autocomplete, Radix) não
-  são `<select>` nativo — não vão funcionar com `fillSelect()` como está.
-  Precisa detectar `role="combobox"` e simular clique + teclado.
 - **Inputs com máscara de lib de terceiro** (ex: `react-input-mask`) podem
   interceptar `keydown` em vez de só escutar `input`/`change` — é onde o
   Fake Data Easy provavelmente travou. Se `nativeSetValue` + eventos não
@@ -89,8 +86,53 @@ popup.html/css/js    UI: lista de campos + override de tipo + botão preencher
   como tipos detectáveis e já estão na lista de opções do popup, mas ainda
   caem no fallback de palavra aleatória — faltam geradores dedicados.
 - Só o **primeiro** par estado/cidade da página recebe o tratamento de
-  select dependente; formulários com endereço de cobrança E entrega (dois
+  par dependente; formulários com endereço de cobrança E entrega (dois
   pares) preenchem o segundo par sem essa lógica especial.
+- **Listbox virtualizada com lista muito grande** (100+ opções, tipo um
+  combobox de município do Brasil inteiro): só conseguimos escolher entre
+  as opções que estão de fato renderizadas no DOM no momento — se a lib
+  só renderiza uma janela visível e exige scroll/digitação pra revelar o
+  resto, a escolha fica restrita a esse subconjunto.
+
+## Select, dropdown e combobox customizados (shadcn/Radix, cmdk, etc)
+
+Componentes de UI como `<Select>` do shadcn/Radix ou um `Combobox` baseado
+em `cmdk` não são um `<select>` nativo — são um botão/input "trigger" que
+abre uma lista de opções portalizada (geralmente direto no fim do
+`<body>`, fora da árvore do formulário). Não tem `.value` pra setar.
+
+A estratégia em `lib/filler.js`:
+
+1. **Detecção** (`lib/detector.js`): além de `input/select/textarea`,
+   também varremos qualquer elemento com `role="combobox"` ou
+   `aria-haspopup="listbox"` — é assim que essas libs marcam o elemento
+   clicável (é o padrão ARIA combobox, então funciona com shadcn, Radix
+   puro, cmdk e a maioria das implementações que seguem acessibilidade).
+2. **Abertura**: disparamos uma sequência completa de eventos
+   (`pointerdown` → `mousedown` → `pointerup` → `mouseup` → `click`) no
+   trigger. Diferentes libs escutam coisas diferentes pra abrir/selecionar
+   (algumas usam `onClick`, outras `onPointerUp` pra suportar touch);
+   disparando tudo, cobrimos qualquer uma sem depender da implementação
+   interna.
+3. **Espera**: como a lista é portalizada e pode levar um tick (ou uma
+   transição CSS) pra montar, um `MutationObserver` no `document.body`
+   espera até aparecer pelo menos uma opção visível (`role="option"` ou
+   `[cmdk-item]`), com timeout de segurança.
+4. **Seleção**: conta as opções renderizadas e clica numa aleatória — a
+   mesma ideia de "nunca chutar um valor, sempre escolher entre o que
+   existe de fato" que já usávamos pro `<select>` nativo e pro par
+   estado/cidade.
+
+Isso significa que o "valor" gerado por `generators.js` (ex: o tipo
+`estado` chamar `generators.estado()`) é **ignorado** pra esse tipo de
+campo — a única coisa que importa é abrir, contar e clicar. `valueFor()`
+em `content.js` ainda calcula um valor pra esses tipos por uniformidade de
+código, mas ele nunca chega a ser usado nesse caminho.
+
+`fillField(el, value)` decide a estratégia certa sozinho, baseado no
+elemento (`native-select` / `custom-dropdown` / `text-like`) — quem chama
+não precisa saber qual é qual. `fillDependentPair(elA, elB)` generaliza o
+caso estado→cidade pra qualquer combinação dos três tipos nos dois lados.
 
 ## Como testar
 

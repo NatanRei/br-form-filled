@@ -52,6 +52,10 @@ jeito diferente — e nenhuma delas pensa em dado brasileiro válido por padrão
 - **Funciona em formulário controlado** — preenche via setter nativo do
   `HTMLInputElement`, então React, Vue e Angular percebem a mudança de
   verdade (esse é o bug clássico que derruba outras extensões).
+- **Funciona em Select/Combobox de biblioteca de UI** (shadcn, Radix,
+  cmdk) — esses componentes não são `<select>` nativo, então a extensão
+  abre o dropdown de verdade, espera a lista de opções renderizar e clica
+  numa real, exatamente como um humano faria.
 - **Não embaralha select dependente** — em campos tipo estado → cidade,
   espera a cidade popular e escolhe uma opção que existe de fato, em vez de
   chutar texto livre num `<select>`.
@@ -90,7 +94,8 @@ lembrada.
 
 ## Roadmap
 
-- [ ] Dropdowns customizados (`react-select`, MUI Autocomplete)
+- [x] Select/dropdown/combobox customizado (shadcn, Radix, cmdk) — escolhe
+      uma opção real entre as renderizadas, sem depender de `<select>` nativo
 - [ ] Inputs com máscara de lib de terceiro (simulação tecla a tecla)
 - [ ] Shadow DOM e iframes same-origin
 - [ ] Lista completa de municípios do IBGE

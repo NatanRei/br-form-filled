@@ -50,7 +50,7 @@
       // endereco, numero_endereco, bairro, cartao_credito: ainda sem
       // gerador dedicado no MVP — cai no fallback. Próximo passo do roadmap.
       case 'palavra_aleatoria':
-      case 'select_generico':
+      case 'dropdown_generico':
       case 'texto_longo':
       default:
         return generators.palavraAleatoria();
@@ -67,6 +67,7 @@
       key: f.key,
       label: f.label,
       tag: f.tag,
+      isDropdown: f.isDropdown,
       detectedType: saved.overrides[f.key] || f.detectedType,
     }));
 
@@ -90,19 +91,21 @@
       if (key === estadoKey || key === cidadeKey) continue; // tratado abaixo
       const el = fieldRegistry.get(key);
       if (!el) continue;
-      await filler.fillOne(el, valueFor(type, context));
+      await filler.fillField(el, valueFor(type, context));
       await filler.sleep(40); // respiro entre campos, pra não atropelar listeners do site
     }
 
     if (estadoKey) {
       const estadoEl = fieldRegistry.get(estadoKey);
       const cidadeEl = cidadeKey ? fieldRegistry.get(cidadeKey) : null;
-      const estadoValue = generators.estado();
       if (estadoEl && cidadeEl) {
-        const cidadeFallback = generators.cidadePara(estadoValue);
-        await filler.fillEstadoCidade(estadoEl, cidadeEl, estadoValue, cidadeFallback);
+        // fillDependentPair funciona com qualquer combinação de select
+        // nativo, dropdown customizado (shadcn/Radix/cmdk) ou input de
+        // texto livre nos dois lados — sempre escolhendo uma opção que
+        // existe de fato, nunca um texto chutado.
+        await filler.fillDependentPair(estadoEl, cidadeEl);
       } else if (estadoEl) {
-        await filler.fillOne(estadoEl, estadoValue);
+        await filler.fillField(estadoEl, generators.estado());
       }
     }
 
