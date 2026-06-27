@@ -17,6 +17,7 @@ const TYPE_OPTIONS = [
   ['data_nascimento', 'Data de nascimento'],
   ['data_generica', 'Data genérica'],
   ['numero', 'Número'],
+  ['renda', 'Renda'],
   ['senha', 'Senha'],
   ['link', 'Link'],
   ['texto_longo', 'Texto longo'],

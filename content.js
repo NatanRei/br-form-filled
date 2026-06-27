@@ -45,6 +45,14 @@
         return generators.numero();
       case 'estado':
         return generators.estado();
+      case 'cidade':
+        // fallback pra quando 'cidade' é preenchida fora do par com
+        // 'estado' (ex: o campo 'estado' foi marcado como "Deixar vazio").
+        // No par normal, content.js já gera uma cidade compatível com o
+        // estado sorteado — ver handleFill().
+        return generators.cidadePara(generators.estado());
+      case 'renda':
+        return generators.renda();
       case 'link':
         return generators.link();
       // endereco, numero_endereco, bairro, cartao_credito: ainda sem
@@ -60,7 +68,7 @@
   async function handleScan() {
     const fields = detector.scanFields(document);
     fieldRegistry = new Map(fields.map((f) => [f.key, f.el]));
-    lastFingerprint = fingerprint.computeFormFingerprint(fields.map((f) => f.el));
+    lastFingerprint = fingerprint.computeFormFingerprint(fields);
 
     const saved = await fingerprint.loadConfig(lastFingerprint);
     const merged = fields.map((f) => ({
@@ -98,14 +106,20 @@
     if (estadoKey) {
       const estadoEl = fieldRegistry.get(estadoKey);
       const cidadeEl = cidadeKey ? fieldRegistry.get(cidadeKey) : null;
+      // Gerados aqui pra servir de fallback SE o elemento correspondente
+      // for um input de texto comum (select/dropdown ignora e escolhe uma
+      // opção real entre as renderizadas — ver fillField em lib/filler.js).
+      // Sem isso, um par estado/cidade onde um dos dois é texto livre
+      // ficava com o valor "undefined" escrito literalmente no campo.
+      const estadoValue = generators.estado();
+      const cidadeValue = generators.cidadePara(estadoValue);
       if (estadoEl && cidadeEl) {
         // fillDependentPair funciona com qualquer combinação de select
         // nativo, dropdown customizado (shadcn/Radix/cmdk) ou input de
-        // texto livre nos dois lados — sempre escolhendo uma opção que
-        // existe de fato, nunca um texto chutado.
-        await filler.fillDependentPair(estadoEl, cidadeEl);
+        // texto livre nos dois lados.
+        await filler.fillDependentPair(estadoEl, cidadeEl, estadoValue, cidadeValue);
       } else if (estadoEl) {
-        await filler.fillField(estadoEl, generators.estado());
+        await filler.fillField(estadoEl, estadoValue);
       }
     }
 
