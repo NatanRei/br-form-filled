@@ -45,6 +45,8 @@
         return generators.numero();
       case 'estado':
         return generators.estado();
+      case 'link':
+        return generators.link();
       // endereco, numero_endereco, bairro, cartao_credito: ainda sem
       // gerador dedicado no MVP — cai no fallback. Próximo passo do roadmap.
       case 'palavra_aleatoria':

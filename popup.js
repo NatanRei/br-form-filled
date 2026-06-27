@@ -18,6 +18,7 @@ const TYPE_OPTIONS = [
   ['data_generica', 'Data genérica'],
   ['numero', 'Número'],
   ['senha', 'Senha'],
+  ['link', 'Link'],
   ['texto_longo', 'Texto longo'],
   ['select_generico', 'Select genérico'],
   ['palavra_aleatoria', 'Palavra aleatória'],
