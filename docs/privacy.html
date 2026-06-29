@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Política de Privacidade — BR Form Filler</title>
+  <style>
+    body {
+      max-width: 640px;
+      margin: 48px auto;
+      padding: 0 20px;
+      font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #1c1c1a;
+      line-height: 1.6;
+    }
+    h1 { font-size: 22px; margin-bottom: 4px; }
+    .subtitle { color: #6b6b65; font-size: 13px; margin-bottom: 32px; }
+    h2 { font-size: 16px; margin-top: 32px; color: #146c43; }
+    ul { padding-left: 20px; }
+    code {
+      background: #f7f7f5;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    a { color: #146c43; }
+  </style>
+</head>
+<body>
+  <h1>Política de Privacidade — BR Form Filler</h1>
+  <p class="subtitle">Última atualização: junho de 2026</p>
+
+  <h2>Resumo</h2>
+  <p>O BR Form Filler não coleta, armazena em servidor, vende ou compartilha
+  nenhum dado pessoal. Tudo o que a extensão faz acontece localmente, dentro
+  do seu navegador.</p>
+
+  <h2>O que a extensão lê</h2>
+  <p>Quando você clica no ícone da extensão, ela lê os campos de formulário
+  (<code>input</code>, <code>select</code>, <code>textarea</code> e
+  componentes de dropdown) presentes na aba ativa naquele momento, com o
+  único objetivo de detectar o tipo de cada campo e preenchê-lo com dados de
+  teste gerados localmente. Essa leitura só acontece quando você clica no
+  ícone — a extensão não roda em segundo plano nem observa páginas sem você
+  interagir com ela.</p>
+
+  <h2>O que a extensão armazena</h2>
+  <p>A extensão guarda, usando a API <code>chrome.storage.local</code> do
+  próprio navegador:</p>
+  <ul>
+    <li>Uma identificação (fingerprint) do conjunto de campos de cada
+    formulário já visto, pra lembrar qual tipo de dado você escolheu pra
+    cada campo;</li>
+    <li>O tipo escolhido pra cada campo (ex: "CPF", "E-mail", "Cidade").</li>
+  </ul>
+  <p>Esses dados ficam só no seu navegador, no seu próprio computador. A
+  extensão não tem servidor, não faz nenhuma chamada de rede, e essa
+  informação nunca sai do seu navegador.</p>
+
+  <h2>O que a extensão NÃO faz</h2>
+  <ul>
+    <li>Não envia nenhum dado pra servidor algum;</li>
+    <li>Não coleta CPF, e-mail, nome ou qualquer outro dado real que você
+    tenha digitado — só gera dados fictícios próprios;</li>
+    <li>Não usa cookies, analytics ou rastreamento de qualquer tipo;</li>
+    <li>Não vende nem compartilha informação com terceiros, porque
+    simplesmente não existe informação saindo do seu navegador pra
+    compartilhar.</li>
+  </ul>
+
+  <h2>Permissões usadas</h2>
+  <ul>
+    <li><code>activeTab</code> — pra ler e preencher o formulário só na aba
+    ativa, só quando você clica no ícone;</li>
+    <li><code>scripting</code> — pra injetar o script de leitura/preenchimento
+    sob demanda (não fica residente em toda página);</li>
+    <li><code>storage</code> — pra guardar a configuração localmente, como
+    descrito acima.</li>
+  </ul>
+
+  <h2>Código aberto</h2>
+  <p>Todo o código está disponível publicamente em
+  <a href="https://github.com/NatanRei/br-form-filled">github.com/NatanRei/br-form-filled</a>
+  — qualquer pessoa pode verificar exatamente o que a extensão faz.</p>
+
+  <h2>Contato</h2>
+  <p>Dúvidas ou problemas: abra uma
+  <a href="https://github.com/NatanRei/br-form-filled/issues">issue no GitHub</a>.</p>
+</body>
+</html>
