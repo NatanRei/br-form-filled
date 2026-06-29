@@ -8,8 +8,11 @@
 ![Manifest](https://img.shields.io/badge/manifest-v3-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Local first](https://img.shields.io/badge/dados-100%25%20locais-success)
+[![Buy Me a Coffee](https://img.shields.io/badge/☕-Buy%20Me%20a%20Coffee-FFDD00?logo=buymeacoffee&logoColor=000000)](https://buymeacoffee.com/NatanRei)
 
 </div>
+
+
 
 ---
 
@@ -19,7 +22,9 @@ colar, voltar, gerar um CEP, copiar, colar, repetir pra cada campo. O **BR
 Form Filler** lê o formulário, descobre o tipo de cada campo sozinho, e
 preenche tudo com um clique — sem trocar de aba.
 
-<!-- TODO: screenshot ou GIF do popup preenchendo um formulário real aqui -->
+<p align="center">
+  <img src="docs/extension-in-use.png" alt="BR Form Filler preenchendo um formulário" width="600">
+</p>
 
 ## Por que mais uma extensão de autofill?
 
@@ -113,3 +118,17 @@ quebrou. É basicamente assim que esse projeto nasceu.
 ## Licença
 
 [MIT](./LICENSE) — use, modifique e distribua livremente.
+
+## Privacidade
+
+O BR Form Filler é **100% local**. Nenhum dado preenchido, configuração ou conteúdo dos formulários é enviado para servidores.
+
+Para mais detalhes, consulte a Política de Privacidade:
+https://natanrei.github.io/br-form-filled/privacy.html
+
+<hr />
+
+<p align="center">
+  ☕ Se o BR Form Filler economizou seu tempo, considere apoiar o projeto.<br>
+  <a href="https://buymeacoffee.com/NatanRei">buymeacoffee.com/NatanRei</a>
+</p>

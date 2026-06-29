@@ -6,7 +6,7 @@
 
 # BR Form Filler — esqueleto de arquitetura
 
-MVP funcional pra você começar a codar em cima. Resolve, de propósito, os 3
+Extensão funcional pra você começar a codar em cima. Resolve, de propósito, os 3
 bugs que você encontrou testando Fake Filler, Fake Data Easy e o gerador da
 Box4Dev — o resto (cobertura de campos, lista de cidades, UI) é roadmap.
 
@@ -127,7 +127,7 @@ label slugificado**.
   de cada `iframe` (same-origin only; cross-origin é bloqueado pelo browser
   por design, sem solução).
 - **Lista de cidades é só um subconjunto** de 7 estados — trocar por JSON
-  completo do IBGE quando for além do MVP.
+  completo do IBGE.
 - **`endereco`, `numero_endereco`, `bairro`, `cartao_credito`** já aparecem
   como tipos detectáveis e já estão na lista de opções do popup, mas ainda
   caem no fallback de palavra aleatória — faltam geradores dedicados.

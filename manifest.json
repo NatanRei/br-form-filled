@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "BR Form Filler",
   "version": "0.1.0",
-  "description": "Detecta os campos de um formulário e preenche com dados de teste válidos (CPF, CNPJ, CEP, etc). MVP local, sem servidor.",
+  "description": "Detecta os campos de um formulário e preenche com dados de teste válidos (CPF, CNPJ, CEP, etc). Tudo local, sem servidor.",
   "permissions": [
     "activeTab",
     "scripting",
