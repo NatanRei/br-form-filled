@@ -8,6 +8,7 @@
 ![Manifest](https://img.shields.io/badge/manifest-v3-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Local first](https://img.shields.io/badge/dados-100%25%20locais-success)
+[![Chrome Web Store](https://img.shields.io/badge/-Chrome%20Web%20Store-4285F4?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/br-form-filler/mpdfgajnglaciaigmacodlgbagfieilo)
 [![Buy Me a Coffee](https://img.shields.io/badge/☕-Buy%20Me%20a%20Coffee-FFDD00?logo=buymeacoffee&logoColor=000000)](https://buymeacoffee.com/NatanRei)
 
 </div>
@@ -76,7 +77,11 @@ jeito diferente — e nenhuma delas pensa em dado brasileiro válido por padrão
 
 ## Instalação
 
-Ainda não publicado na Chrome Web Store — por enquanto, modo desenvolvedor:
+A extensão já está publicada na Chrome Web Store:
+
+- https://chromewebstore.google.com/detail/br-form-filler/mpdfgajnglaciaigmacodlgbagfieilo
+
+Se quiser instalar manualmente em modo desenvolvedor:
 
 ```bash
 git clone https://github.com/SEU_USUARIO/br-form-filler.git
